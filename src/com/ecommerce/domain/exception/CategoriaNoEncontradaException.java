@@ -6,6 +6,6 @@ public class CategoriaNoEncontradaException extends RuntimeException {
     }
 
     public CategoriaNoEncontradaException(String nombre) {
-        super("No existe una categoría con nombre: " + nombre);
+        super("No existe una categoría con nombre " + nombre);
     }
 }

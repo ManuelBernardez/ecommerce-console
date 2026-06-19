@@ -48,8 +48,19 @@ public class MenuCategorias extends Menu {
                     break;
                 case 3:
                     System.out.println("\n--- BUSCAR CATEGORÍA ---");
-                    // Buscar() definido en la clase abstracta Menu
-                    buscar();
+                    int tipoBusqueda = leerEntero(scanner, "1: Buscar por código / 2: Buscar por nombre: ");
+
+                    switch (tipoBusqueda) {
+                        case 1:
+                            buscarPorCodigo();
+                            break;
+                        case 2:
+                            buscarPorNombre();
+                            break;
+
+                        default:
+                            System.out.println("Opción inválida");
+                    }
 
                     break;
                 case 4:
@@ -126,20 +137,24 @@ public class MenuCategorias extends Menu {
     protected void modificar() {
 
         int c = leerEntero(scanner, "Código de la categoría: ");
-        Categoria categoria = categoriaService.buscarPorCodigo(c);
 
-        String nombre = "";
-        if(leerSiNo(scanner, "¿Modificar nombre?"))
-            nombre = leerTexto(scanner, "Nuevo nombre: ");
+        try {
+            Categoria categoria = categoriaService.buscarPorCodigo(c);
 
-        String descripcion = leerTexto(scanner, "Nueva descripción: ");
+            String nombre = "";
+            if (leerSiNo(scanner, "¿Modificar nombre?"))
+                nombre = leerTexto(scanner, "Nuevo nombre: ");
 
-        try{
+            String descripcion = leerTexto(scanner, "Nueva descripción: ");
+
             categoriaService.modificar(categoria, nombre, descripcion);
             System.out.println("Categoría modificada correctamente");
 
-        } catch (CategoriaDuplicadaException e){
-            System.out.println("Error al cambiar de nombre. " + e.getMessage());
+        } catch (CategoriaNoEncontradaException e) {
+            System.out.println("Error: " + e.getMessage());
+
+        } catch (CategoriaDuplicadaException e) {
+            System.out.println("Error al cambiar el nombre: " + e.getMessage());
         }
     }
 
@@ -153,11 +168,19 @@ public class MenuCategorias extends Menu {
 
         int codigo = leerEntero(scanner, "Ingrese el código: ");
 
-        if (leerSiNo(scanner, "¿Borrar definitivamente?")) {
+        try{
+            Categoria c = categoriaService.buscarPorCodigo(codigo);
+            System.out.println(c);
+
+            if (leerSiNo(scanner, "¿Borrar definitivamente?")) {
                 categoriaService.eliminar(codigo);
                 System.out.println("Categoría eliminada correctamente");
+            }
+            else
+                System.out.println("Operación cancelada");
+
+        } catch (CategoriaNoEncontradaException e) {
+            System.out.println("Error: " + e.getMessage());
         }
-        else
-            System.out.println("Operación cancelada");
     }
 }

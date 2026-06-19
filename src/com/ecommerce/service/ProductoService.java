@@ -17,19 +17,19 @@ public class ProductoService {
         this.repoCategorias = repoCategorias;
     }
 
-    public void crearAlimenticio(String nombre, double precio, String categoria, int vencimiento) {
+    public void crearAlimenticio(String nombre, double precio, Categoria categoria, int vencimiento) {
         validarCategoria(categoria);
         validarDuplicado(nombre);
 
-        Producto p = new ProductoAlimenticio(Secuencias.generarCodigoProducto(), nombre, precio, categoria, vencimiento);
+        Producto p = new ProductoAlimenticio(Secuencias.generarCodigoProducto(), nombre, precio, categoria.getNombre(), vencimiento);
         repoProductos.agregar(p);
     }
 
-    public void crearElectronico(String nombre, double precio, String categoria, double garantiaMeses) {
+    public void crearElectronico(String nombre, double precio, Categoria categoria, double garantiaMeses) {
         validarCategoria(categoria);
         validarDuplicado(nombre);
 
-        Producto p = new ProductoElectronico(Secuencias.generarCodigoProducto(), nombre, precio, categoria, garantiaMeses);
+        Producto p = new ProductoElectronico(Secuencias.generarCodigoProducto(), nombre, precio, categoria.getNombre(), garantiaMeses);
         repoProductos.agregar(p);
     }
 
@@ -49,12 +49,12 @@ public class ProductoService {
 
     public Producto buscarPorNombre(String nombre) {
 
-        Producto p = repoProductos.buscarPorNombre(nombre);
+        for (Producto p : repoProductos.listado()) {
+            if (p.getNombre().equalsIgnoreCase(nombre))
+                return p;
+        }
 
-        if (p == null)
-            throw new ProductoNoEncontradoException(nombre);
-
-        return p;
+        throw new ProductoNoEncontradoException(nombre);
     }
 
     public void modificar(Producto p, String nombre, double precio) {
@@ -63,7 +63,7 @@ public class ProductoService {
 
         // Si se quiere cambiar el nombre, verifico que el nuevo nombre sea distinto al de los productos existentes
         if (!esVacio(nombre)) {
-            Producto existente = repoProductos.buscarPorNombre(nombre);
+            Producto existente = buscarPorNombre(nombre);
 
             if (existente != null)
                 throw new ProductoDuplicadoException(nombre);
@@ -73,22 +73,36 @@ public class ProductoService {
     }
 
     public void eliminar(int codigo) {
-
         Producto p = buscarPorCodigo(codigo);
         repoProductos.eliminar(p);
     }
 
+    public List<Categoria> listarCategorias() {
+        return repoCategorias.listado();
+    }
+
+    public Categoria buscarCategoriaPorCodigo(int codigo) {
+        Categoria c = repoCategorias.buscarPorCodigo(codigo);
+
+        if (c == null)
+            throw new CategoriaNoEncontradaException(codigo);
+
+        return c;
+    }
+
     private void validarDuplicado(String nombre) {
 
-        if (repoProductos.buscarPorNombre(nombre) != null)
-            throw new ProductoDuplicadoException(nombre);
+        try {
+            if (buscarPorNombre(nombre) != null)
+                throw new ProductoDuplicadoException(nombre);
+        } catch (ProductoNoEncontradoException e){}
 
     }
 
-    private void validarCategoria(String categoria) {
+    private void validarCategoria(Categoria categoria) {
 
-        if (repoCategorias.buscarPorNombre(categoria) == null)
-            throw new CategoriaNoEncontradaException(categoria);
+        if (repoCategorias.buscarPorCodigo(categoria.getCodigo()) == null)
+            throw new CategoriaNoEncontradaException(categoria.getCodigo());
     }
 
 }

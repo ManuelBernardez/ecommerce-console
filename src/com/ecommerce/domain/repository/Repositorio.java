@@ -15,7 +15,7 @@ public class Repositorio<T extends Identificable> {
         if (objeto == null)
             throw new IllegalArgumentException("Debe agregar un elemento válido");
 
-        if ( buscarPorCodigo(objeto.getCodigo()) != null )
+        if (buscarPorCodigo(objeto.getCodigo()) != null)
             throw new IllegalArgumentException("Ya existe un elemento con ese código");
 
         lista.add(objeto);
@@ -29,16 +29,6 @@ public class Repositorio<T extends Identificable> {
 
         for(T objeto : lista){
             if(objeto.getCodigo() == codigo)
-                return objeto;
-        }
-
-        return null;
-    }
-
-    public T buscarPorNombre(String nombre){
-
-        for(T objeto : lista){
-            if (objeto.getNombre().equalsIgnoreCase(nombre))
                 return objeto;
         }
 

@@ -18,26 +18,7 @@ public abstract class Menu {
     protected abstract void crear();
     protected abstract void listar();
     protected abstract void buscarPorCodigo();
-    protected abstract void buscarPorNombre();
-    protected void buscar() {
 
-        int tipoBusqueda = leerEntero(scanner, "1: Buscar por código / 2: Buscar por nombre: ");
-
-        switch (tipoBusqueda) {
-            case 1:
-                buscarPorCodigo();
-                break;
-
-            case 2:
-                buscarPorNombre();
-                break;
-
-            default:
-                System.out.println("Opción inválida");
-        }
-
-
-    }
     protected abstract void modificar();
     protected abstract void eliminar();
 

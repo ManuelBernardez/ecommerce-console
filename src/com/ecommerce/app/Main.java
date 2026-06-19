@@ -18,10 +18,12 @@ public class Main {
         // Repositorios (Estructura de datos)
         Repositorio<Categoria> repoCategorias = new Repositorio<>();
         Repositorio<Producto> repoProductos = new Repositorio<>();
+        Repositorio<Pedido> repoPedidos = new Repositorio<>();
 
         // Servicios (Lógica)
         CategoriaService categoriaService = new CategoriaService(repoCategorias);
         ProductoService productoService = new ProductoService(repoProductos, repoCategorias);
+        PedidoService pedidoService = new PedidoService(repoPedidos, repoProductos);
 
         categoriaService.crear("Alimentos", "Estos productos tienen Vencimiento");
         categoriaService.crear("Electronica", "Estos productos tienen Garantía");
@@ -29,6 +31,7 @@ public class Main {
         // Menús (UI)
         MenuCategorias menuCategorias = new MenuCategorias(scanner, categoriaService);
         MenuProductos menuProductos = new MenuProductos(scanner, productoService);
+        MenuPedidos menuPedidos = new MenuPedidos(scanner, pedidoService);
 
         // ===== MENÚ PRINCIPAL =====
         int opcion;
@@ -38,27 +41,31 @@ public class Main {
             System.out.println("    SISTEMA DE GESTIÓN    ");
             System.out.println("==========================");
             System.out.println("1. Gestionar productos");
-            System.out.println("2. Gestionar categorías");
-            System.out.println("3. Salir");
+            System.out.println("2. Gestionar pedidos");
+            System.out.println("3. Gestionar categorías");
+            System.out.println("4. Salir");
             System.out.println("==========================");
 
-            opcion = leerEntero(scanner, "Elegir opción (1-3): ");
+            opcion = leerEntero(scanner, "Elegir opción (1-4): ");
 
             switch (opcion) {
                 case 1:
                     menuProductos.ejecutar();
                     break;
                 case 2:
-                    menuCategorias.ejecutar();
+                    menuPedidos.ejecutar();
                     break;
                 case 3:
+                    menuCategorias.ejecutar();
+                    break;
+                case 4:
                     System.out.println("Saliendo del sistema...");
                     break;
                 default:
                     System.out.println("Opción inválida");
             }
 
-        } while (opcion != 3);
+        } while (opcion != 4);
 
         scanner.close();
     }

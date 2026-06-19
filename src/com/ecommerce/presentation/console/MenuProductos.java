@@ -2,9 +2,13 @@ package com.ecommerce.presentation.console;
 
 import static com.ecommerce.utils.EntradaDatos.*;
 
+import com.ecommerce.domain.exception.CategoriaDuplicadaException;
 import com.ecommerce.domain.exception.CategoriaNoEncontradaException;
 import com.ecommerce.domain.exception.ProductoDuplicadoException;
 import com.ecommerce.domain.exception.ProductoNoEncontradoException;
+import com.ecommerce.domain.interfaces.Identificable;
+import com.ecommerce.domain.model.Categoria;
+import com.ecommerce.domain.repository.Repositorio;
 import com.ecommerce.service.ProductoService;
 import com.ecommerce.domain.model.Producto;
 
@@ -52,12 +56,25 @@ public class MenuProductos extends Menu {
                     break;
                 case 3:
                     System.out.println("\n--- CONSULTAR PRODUCTO ---");
-                    // Buscar() definido en la clase abstracta Menu
-                    buscar();
+                    int tipoBusqueda = leerEntero(scanner, "1: Buscar por código / 2: Buscar por nombre: ");
+
+                    switch (tipoBusqueda) {
+                        case 1:
+                            buscarPorCodigo();
+                            break;
+
+                        case 2:
+                            buscarPorNombre();
+                            break;
+
+                        default:
+                            System.out.println("Opción inválida");
+                    }
 
                     break;
                 case 4:
                     System.out.println("\n--- MODIFICAR PRODUCTOS ---");
+                    listar();
                     modificar();
 
                     break;
@@ -82,22 +99,29 @@ public class MenuProductos extends Menu {
         try {
             String nombre = leerTexto(scanner, "Ingrese nombre: ");
             double precio = leerDouble(scanner, "Ingrese precio: ");
-            String categoria = leerTexto(scanner, "Nombre de categoría: ").trim();
 
-            switch (categoria) {
-                case "Alimentos":
+            System.out.println("\nCATEGORÍAS DISPONIBLES");
+            for (Categoria c : productoService.listarCategorias()) {
+                System.out.println(c);
+            }
+
+            int codigoCategoria = leerEntero(scanner, "Ingrese código de categoría: ");
+            Categoria categoria = productoService.buscarCategoriaPorCodigo(codigoCategoria);
+
+            switch (codigoCategoria) {
+
+                case 1:
                     int vencimiento = leerEntero(scanner, "Vence en (días): ");
                     productoService.crearAlimenticio(nombre, precio, categoria, vencimiento);
                     break;
 
-                case "Electronica":
+                case 2:
                     double garantia = leerDouble(scanner, "Meses de garantía: ");
                     productoService.crearElectronico(nombre, precio, categoria, garantia);
                     break;
 
                 default:
-                    System.out.println("Categoría inválida");
-                    throw new CategoriaNoEncontradaException(categoria);
+                    System.out.println("Tipo de categoría no soportado por lógica de producto");
             }
 
             System.out.println("Producto creado correctamente");
@@ -132,14 +156,13 @@ public class MenuProductos extends Menu {
         }
     }
 
-    @Override
     protected void buscarPorNombre() {
 
         try {
             String nombre = leerTexto(scanner, "Ingrese el nombre: ");
 
             Producto p = productoService.buscarPorNombre(nombre);
-            System.out.println("Encontrado: " + p);
+            System.out.println("Producto: " + p);
 
         } catch (ProductoNoEncontradoException e) {
             System.out.println(e.getMessage());
@@ -150,18 +173,22 @@ public class MenuProductos extends Menu {
     protected void modificar() {
 
         int codigo = leerEntero(scanner, "Código del producto: ");
-        Producto producto = productoService.buscarPorCodigo(codigo);
-
-        // Cambiar el nombre es opcional
-        String nombre = "";
-        if(leerSiNo(scanner, "¿Modificar nombre?"))
-            nombre = leerTexto(scanner, "Nuevo nombre: ");
-
-        double precio = leerDouble(scanner, "Nuevo precio: ");
 
         try{
+            Producto producto = productoService.buscarPorCodigo(codigo);
+
+            // Cambiar el nombre es opcional
+            String nombre = "";
+            if(leerSiNo(scanner, "¿Modificar nombre?"))
+                nombre = leerTexto(scanner, "Nuevo nombre: ");
+
+            double precio = leerDouble(scanner, "Nuevo precio: ");
+
             productoService.modificar(producto, nombre, precio);
             System.out.println("Producto modificado correctamente");
+
+        } catch (ProductoNoEncontradoException e) {
+            System.out.println("Error: " + e.getMessage());
 
         } catch (ProductoDuplicadoException e){
             System.out.println("Error al cambiar de nombre. " + e.getMessage());
@@ -173,12 +200,20 @@ public class MenuProductos extends Menu {
 
         int codigo = leerEntero(scanner, "Ingrese el código: ");
 
-        if (leerSiNo(scanner, "¿Borrar definitivamente?")) {
-            productoService.eliminar(codigo);
-            System.out.println("Producto eliminado correctamente");
-        }
-        else {
-            System.out.println("Operación cancelada");
+        try{
+            Producto p = productoService.buscarPorCodigo(codigo);
+            System.out.println(p);
+
+            if (leerSiNo(scanner, "¿Borrar definitivamente?")) {
+                productoService.eliminar(codigo);
+                System.out.println("Producto eliminado correctamente");
+            }
+            else {
+                System.out.println("Operación cancelada");
+            }
+
+        } catch (ProductoNoEncontradoException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }

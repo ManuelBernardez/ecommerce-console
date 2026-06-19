@@ -19,7 +19,7 @@ public class CategoriaService {
 
     public void crear(String nombre, String descripcion) {
 
-        if (repoCategorias.buscarPorNombre(nombre) != null)
+        if (buscarPorNombre(nombre) != null)
             throw new CategoriaDuplicadaException(nombre);
 
         Categoria categoria = new Categoria(Secuencias.generarCodigoCategoria(), nombre, descripcion);
@@ -43,12 +43,12 @@ public class CategoriaService {
 
     public Categoria buscarPorNombre(String nombre) {
 
-        Categoria c = repoCategorias.buscarPorNombre(nombre);
+        for (Categoria p : repoCategorias.listado()) {
+            if (p.getNombre().equalsIgnoreCase(nombre))
+                return p;
+        }
 
-        if (c == null)
-            throw new CategoriaNoEncontradaException(nombre);
-
-        return c;
+        return null;
     }
 
     public void modificar(Categoria categoria, String nombre, String descripcion) {
@@ -57,7 +57,7 @@ public class CategoriaService {
 
         // Si se quiere cambiar el nombre, verifico que el nuevo nombre sea distinto al de los productos existentes
         if (!esVacio(nombre)) {
-            Categoria existente = repoCategorias.buscarPorNombre(nombre);
+            Categoria existente = buscarPorNombre(nombre);
 
             if (existente != null)
                 throw new CategoriaDuplicadaException(nombre);
