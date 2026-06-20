@@ -4,8 +4,8 @@ public class ProductoElectronico extends Producto {
 
     private double mesesGarantia;
 
-    public ProductoElectronico(int codigo, String nombre, double precio, String categoria, double mesesGarantia) {
-        super(codigo, nombre, precio, categoria);
+    public ProductoElectronico(int codigo, String nombre, double precio, Categoria categoria, int stock, double mesesGarantia) {
+        super(codigo, nombre, precio, categoria, stock);
         this.mesesGarantia = mesesGarantia;
     }
 
@@ -20,11 +20,6 @@ public class ProductoElectronico extends Producto {
             return precio * 1.10;
 
         return precio;
-    }
-
-    @Override
-    public String getTipoProducto(){
-        return "Electrónico";
     }
 
         @Override

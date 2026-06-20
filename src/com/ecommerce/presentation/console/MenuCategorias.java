@@ -2,6 +2,7 @@ package com.ecommerce.presentation.console;
 
 import static com.ecommerce.utils.EntradaDatos.*;
 
+import com.ecommerce.domain.model.Producto;
 import com.ecommerce.service.CategoriaService;
 import com.ecommerce.domain.model.Categoria;
 import com.ecommerce.domain.exception.*;
@@ -166,11 +167,16 @@ public class MenuCategorias extends Menu {
             return;
         }
 
+        listar();
         int codigo = leerEntero(scanner, "Ingrese el código: ");
 
         try{
             Categoria c = categoriaService.buscarPorCodigo(codigo);
-            System.out.println(c);
+
+            if (categoriaService.categoriaTieneArticulosAsociados(c)) {
+                System.out.println("\nNo se puede eliminar la categoría porque tiene artículos asociados.");
+                return;
+            }
 
             if (leerSiNo(scanner, "¿Borrar definitivamente?")) {
                 categoriaService.eliminar(codigo);

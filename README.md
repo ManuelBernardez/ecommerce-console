@@ -1,31 +1,55 @@
-# Sistema de Ecommerce
+# Ecommerce Console
 
-El proyecto está desarrollado en Java y actualmente funciona mediante consola. El objetivo es convertirlo en una API RESTful completa con Spring Boot y MySQL.
+Esta es la primera iteración de un sistema de comercio electrónico que estoy desarrollando. Incluye las entidades, procesos y relaciones elementales para la gestión del sistema. 
 
-
-## Estado del proyecto
-
-> **Fase actual:** Java puro, lógica orientada a objetos, arquitectura por capas (domain, service, presentation), persistencia temporal en memoria. CRUD de productos, categorías y pedidos.
-> **Etapa en desarrollo:** Migración a Spring Boot y persistencia con MySQL.
+El objetivo fue modelar e implementar una versión académica para comprender en profundidad las necesidades del sistema, aplicando buenas prácticas de diseño y desarrollo de software. La aplicación permite gestionar productos, categorías y pedidos mediante una interfaz de consola, con persistencia temporal en memoria. 
 
 
+## Cómo ejecutar
 
-## Funcionalidades actuales
+1. Clonar el repositorio
+```bash
+git clone https://github.com/ManuelBernardez/ecommerce-console.git
+cd ecommerce-console
+```
+2. Abrir el proyecto en cualquier IDE compatible con Java.
+3. Ejecutar la clase `Main.java`.
 
-- Gestión de **productos**
-- Gestión de **categorías**
-- Gestión de **pedidos**
-- Interacción mediante menú por consola
+
+## Funcionalidades
+
+- [x] Gestión de inventario
+- [x] CRUD de categorías, pedidos y productos
+- [x] Módulos reutilizables (secuencias y validaciones)
+- [x] Manejo de excepciones personalizadas
+- [x] Interfaz de consola 
 
 
+## Conceptos aplicados
 
-## Tecnologías actuales
+- Enums
+- Generics
+- Colecciones
+- Reglas de negocio y excepciones personalizadas
+- Programación Orientada a Objetos: principios SOLID, herencia, polimorfismo, encapsulamiento, clases abstractas e interfaces
+- Arquitectura en capas (dominio, servicio y presentación)
 
-| Tecnología | Uso |
-|---|---|
-| Java | Lenguaje principal |
-| Git | Control de versiones |
 
+## Reglas de negocio importantes
+
+**Control de stock y consistencia con el pedido**
+- Al agregar un producto al pedido: se valida su existencia, se verifica stock disponible y se descuenta del inventario si es válido.
+- Al quitar un producto del pedido: se elimina del carrito y se repone el stock al inventario
+- No se pueden eliminar categorías o productos que tengan pedidos asociados
+
+**Gestión de estados del pedido**
+- Un pedido solo puede modificarse si está en estado `CREADO`
+- Transiciones de estado válidas: `CREADO → ENVIADO / CANCELADO`
+- Evita modificaciones inconsistentes sobre pedidos ya procesados
+
+**Validaciones de integridad**
+- No se permiten productos ni pedidos nulos o inexistentes, ni valores u operaciones inválidas (como cantidades negativas)
+- Validación de duplicados en productos y categorías
 
 
 ## Estructura del proyecto
@@ -33,62 +57,21 @@ El proyecto está desarrollado en Java y actualmente funciona mediante consola. 
 ```
 src/ 
 ├── domain/ 
-│   ├── model/ 
-│   ├── repository/ 
-│   ├── interfaces/ 
-│   └── exception/ 
-├── service/        # Lógica de negocio 
+│     ├── model/ 
+│     ├── repository/ 
+│     ├── interfaces/ 
+│     └── exception/ 
+├── service/              # Lógica de negocio 
 ├── presentation/ 
-│   └── console/    # Interfaz por consola 
+│     └── console/        # Interfaz por consola 
 ├── utils/ 
 └── app/ 
-    └── Main.java # Punto de entrada
+      └── Main.java       # Punto de entrada
 ```
-
-
-
-## Cómo ejecutar
-
-1. Clonar el repositorio
-
-```bash
-git clone https://github.com/ManuelBernardez/e-commerce.git
-cd e-commerce
-```
-
-2. Abrir el proyecto en cualquier IDE compatible con Java.
-
-3. Ejecutar la clase `Main.java`.
-
-
-
-## Roadmap
-
-- [x] CRUD de productos por consola
-- [x] CRUD de categorías por consola
-- [x] CRUD de pedidos por consola
-- [ ] Migración a Spring Boot
-- [ ] Persistencia con MySQL
-- [ ] Implementación de endpoints REST
-- [ ] Integración con frontend
-- [ ] Carrito de compras
-- [ ] Autenticación y autorización
-- [ ] Configuración de CORS
-- [ ] Dockerización
-
-
-
-## Objetivos técnicos
-
-- Aplicar principios SOLID
-- Practicar arquitectura por capas
-- Implementar una API REST escalable
-- Integrar persistencia relacional con MySQL
-- Preparar el sistema para despliegue con Docker
-
 
 
 ## Autor
 
-Desarrollado por Manuel Bernardez,
-Proyecto desarrollado con fines educativos.
+Desarrollado por Manuel Bernardez
+
+Proyecto desarrollado con fines educativos en el marco del curso Backend Java (Techlab/Talento Tech).

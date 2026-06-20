@@ -19,13 +19,14 @@ public class MenuPedidos extends Menu {
     @Override
     public void mostrarMenu() {
         System.out.println("\n--- MENÚ PEDIDOS ---");
-        System.out.println("1 - Crear pedido");
-        System.out.println("2 - Listar pedidos");
-        System.out.println("3 - Consultar pedido");
-        System.out.println("4 - Agregar producto a pedido");
-        System.out.println("5 - Cambiar estado de pedido");
-        System.out.println("6 - Eliminar pedido");
-        System.out.println("7 - Volver");
+        System.out.println("1. Crear pedido");
+        System.out.println("2. Listar pedidos");
+        System.out.println("3. Consultar pedido");
+        System.out.println("4. Agregar productos al pedido");
+        System.out.println("5. Quitar productos del pedido");
+        System.out.println("6. Cambiar estado de pedido");
+        System.out.println("7. Eliminar pedido");
+        System.out.println("8. Volver");
         System.out.println("----------------------");
     }
 
@@ -36,7 +37,7 @@ public class MenuPedidos extends Menu {
 
         do {
             mostrarMenu();
-            opcion = leerEntero(scanner, "Elija una opción (1-7): ");
+            opcion = leerEntero(scanner, "Elija una opción: ");
 
             switch (opcion) {
 
@@ -53,21 +54,38 @@ public class MenuPedidos extends Menu {
                     break;
 
                 case 4:
+                    listar();
                     int c = leerEntero(scanner, "Código del pedido: ");
-                    Pedido p = pedidoService.buscarPorCodigo(c);
 
-                    agregarProducto(p);
+                    try {
+                        Pedido p = pedidoService.buscarPorCodigo(c);
+                        agregarProducto(p);
+                    } catch (RuntimeException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
                     break;
 
                 case 5:
-                    cambiarEstado();
+                    listar();
+                    int cod = leerEntero(scanner, "Código del pedido: ");
+
+                    try {
+                        Pedido quitar = pedidoService.buscarPorCodigo(cod);
+                        quitarProducto(quitar);
+                    } catch (RuntimeException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
                     break;
 
                 case 6:
-                    eliminar();
+                    modificar();
                     break;
 
                 case 7:
+                    eliminar();
+                    break;
+
+                case 8:
                     System.out.println("Volviendo al menú principal...");
                     break;
 
@@ -75,7 +93,7 @@ public class MenuPedidos extends Menu {
                     System.out.println("Error: Opción inválida");
             }
 
-        } while (opcion != 7);
+        } while (opcion != 8);
     }
 
     @Override
@@ -86,15 +104,12 @@ public class MenuPedidos extends Menu {
         System.out.println("Pedido creado correctamente: #" + pedido.getCodigo());
 
         do {
-            if (leerSiNo(scanner, "¿Desea agregar un producto al pedido?")) {
+            if (leerSiNo(scanner, "¿Desea agregar un producto al pedido?"))
                 agregarProducto(pedido);
-
-            } else {
+             else
                 seguir = false;
-            }
-        } while (seguir);
 
-        System.out.println("Pedido finalizado: #" + pedido.getCodigo());
+        } while (seguir);
     }
 
     @Override
@@ -117,27 +132,45 @@ public class MenuPedidos extends Menu {
         }
     }
 
-    private void agregarProducto(Pedido p) {
+    protected void agregarProducto(Pedido p) {
 
         System.out.println("\n--- PRODUCTOS DISPONIBLES ---");
-        pedidoService.listar_productos();
+        if(pedidoService.mostrarProductos())
+            try {
+                int codigoProducto = leerEntero(scanner, "Código del producto: ");
+                int cantidad = leerEntero(scanner, "Cantidad de unidades: ");
 
-        try {
-            int codigoProducto = leerEntero(scanner, "Código del producto: ");
+                pedidoService.agregarProducto(p.getCodigo(), codigoProducto, cantidad);
 
-            pedidoService.agregarProducto(p.getCodigo(), codigoProducto);
+            } catch (ProductoNoEncontradoException e) {
+                System.out.println("Error: " + e.getMessage());
 
-            System.out.println("Producto agregado al pedido correctamente");
-
-        } catch (ProductoNoEncontradoException e) {
-            System.out.println("Error: " + e.getMessage());
-
-        } catch (IllegalStateException e) {
-            System.out.println("Error de estado: " + e.getMessage());
-        }
+            } catch (IllegalStateException e) {
+                System.out.println("Error de estado: " + e.getMessage());
+            }
     }
 
-    private void cambiarEstado() {
+    protected void quitarProducto(Pedido p) {
+
+        System.out.println("\n--- PRODUCTOS DEL PEDIDO ---");
+
+        if(pedidoService.mostrarProductos())
+            try {
+                int codigoProducto = leerEntero(scanner, "Código del producto a quitar: ");
+                int cantidad = leerEntero(scanner, "Cantidad a eliminar: ");
+
+                pedidoService.quitarProducto(p.getCodigo(), codigoProducto, cantidad);
+
+            } catch (ProductoNoEncontradoException e) {
+                System.out.println("Error: " + e.getMessage());
+
+            } catch (IllegalStateException e) {
+                System.out.println("Error de estado: " + e.getMessage());
+            }
+    }
+
+    @Override
+    protected void modificar() {
 
         int codigoPedido = leerEntero(scanner, "Código del pedido: ");
 
@@ -150,18 +183,13 @@ public class MenuPedidos extends Menu {
 
         try {
             EstadoPedido estado = EstadoPedido.valueOf(estadoInput);
-            pedidoService.cambiarEstado(codigoPedido, estado);
 
-            System.out.println("Estado actualizado correctamente");
+            if (pedidoService.cambiarEstado(codigoPedido, estado))
+                System.out.println("Estado actualizado correctamente");
 
         } catch (IllegalArgumentException e) {
             System.out.println("Estado inválido");
         }
-    }
-
-    @Override
-    protected void modificar() {
-        System.out.println("No se implementa modificación directa de pedidos.");
     }
 
     @Override
@@ -170,8 +198,9 @@ public class MenuPedidos extends Menu {
 
         try {
             if (leerSiNo(scanner, "¿Eliminar pedido?")) {
-                pedidoService.eliminar(codigo);
-                System.out.println("Pedido eliminado correctamente");
+
+                if(pedidoService.eliminar(codigo))
+                    System.out.println("Pedido eliminado correctamente");
             } else
                 System.out.println("Operación cancelada");
 

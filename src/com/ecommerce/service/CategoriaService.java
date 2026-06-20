@@ -1,5 +1,6 @@
 package com.ecommerce.service;
 
+import com.ecommerce.domain.model.Producto;
 import com.ecommerce.domain.repository.Repositorio;
 import com.ecommerce.domain.model.Categoria;
 import com.ecommerce.domain.exception.*;
@@ -10,11 +11,12 @@ import java.util.List;
 import static com.ecommerce.utils.Validar.esVacio;
 
 public class CategoriaService {
-
     private final Repositorio<Categoria> repoCategorias;
+    private final Repositorio<Producto> repoProductos;
 
-    public CategoriaService(Repositorio<Categoria> repoCategorias) {
+    public CategoriaService(Repositorio<Categoria> repoCategorias, Repositorio<Producto> repoProductos) {
         this.repoCategorias = repoCategorias;
+        this.repoProductos = repoProductos;
     }
 
     public void crear(String nombre, String descripcion) {
@@ -28,7 +30,7 @@ public class CategoriaService {
     }
 
     public List<Categoria> listar() {
-        return repoCategorias.listado();
+        return repoCategorias.listar();
     }
 
     public Categoria buscarPorCodigo(int codigo) {
@@ -43,7 +45,7 @@ public class CategoriaService {
 
     public Categoria buscarPorNombre(String nombre) {
 
-        for (Categoria p : repoCategorias.listado()) {
+        for (Categoria p : repoCategorias.listar()) {
             if (p.getNombre().equalsIgnoreCase(nombre))
                 return p;
         }
@@ -73,5 +75,13 @@ public class CategoriaService {
 
     public boolean estaVacio(){
         return repoCategorias.estaVacio();
+    }
+
+    public boolean categoriaTieneArticulosAsociados(Categoria categoria) {
+        for (Producto p : repoProductos.listar()) {
+            if (p.getCategoria().getCodigo() == categoria.getCodigo())
+                return true;
+        }
+        return false;
     }
 }

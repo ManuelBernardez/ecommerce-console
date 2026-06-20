@@ -21,7 +21,7 @@ public class Repositorio<T extends Identificable> {
         lista.add(objeto);
     }
 
-    public ArrayList<T> listado() {
+    public ArrayList<T> listar() {
         return new ArrayList<>(lista);
     }
 

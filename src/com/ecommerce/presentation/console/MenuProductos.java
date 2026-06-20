@@ -2,15 +2,13 @@ package com.ecommerce.presentation.console;
 
 import static com.ecommerce.utils.EntradaDatos.*;
 
-import com.ecommerce.domain.exception.CategoriaDuplicadaException;
 import com.ecommerce.domain.exception.CategoriaNoEncontradaException;
 import com.ecommerce.domain.exception.ProductoDuplicadoException;
 import com.ecommerce.domain.exception.ProductoNoEncontradoException;
-import com.ecommerce.domain.interfaces.Identificable;
 import com.ecommerce.domain.model.Categoria;
-import com.ecommerce.domain.repository.Repositorio;
 import com.ecommerce.service.ProductoService;
 import com.ecommerce.domain.model.Producto;
+import com.ecommerce.utils.EntradaDatos;
 
 import java.util.Scanner;
 
@@ -26,12 +24,12 @@ public class MenuProductos extends Menu {
     @Override
     public void mostrarMenu() {
         System.out.println("\n--- MENÚ PRODUCTOS ---");
-        System.out.println("1 - Ingresar producto");
-        System.out.println("2 - Listar producto");
-        System.out.println("3 - Consultar producto");
-        System.out.println("4 - Modificar producto");
-        System.out.println("5 - Eliminar producto");
-        System.out.println("6 - Volver");
+        System.out.println("1. Ingresar producto");
+        System.out.println("2. Listar producto");
+        System.out.println("3. Consultar producto");
+        System.out.println("4. Modificar producto");
+        System.out.println("5. Eliminar producto");
+        System.out.println("6. Volver");
         System.out.println("----------------------");
     }
 
@@ -107,17 +105,18 @@ public class MenuProductos extends Menu {
 
             int codigoCategoria = leerEntero(scanner, "Ingrese código de categoría: ");
             Categoria categoria = productoService.buscarCategoriaPorCodigo(codigoCategoria);
+            int stock = leerEntero(scanner, "Ingrese cantidad en stock: ");
 
             switch (codigoCategoria) {
 
                 case 1:
                     int vencimiento = leerEntero(scanner, "Vence en (días): ");
-                    productoService.crearAlimenticio(nombre, precio, categoria, vencimiento);
+                    productoService.crearAlimenticio(nombre, precio, categoria, stock, vencimiento);
                     break;
 
                 case 2:
                     double garantia = leerDouble(scanner, "Meses de garantía: ");
-                    productoService.crearElectronico(nombre, precio, categoria, garantia);
+                    productoService.crearElectronico(nombre, precio, categoria, stock, garantia);
                     break;
 
                 default:
@@ -173,22 +172,24 @@ public class MenuProductos extends Menu {
     protected void modificar() {
 
         int codigo = leerEntero(scanner, "Código del producto: ");
+        int unidades = 0;
+        double precio = 0;
+        String nombre = "";
 
         try{
             Producto producto = productoService.buscarPorCodigo(codigo);
 
-            // Cambiar el nombre es opcional
-            String nombre = "";
+            if(leerSiNo(scanner, "¿Reponer stock?"))
+                unidades = EntradaDatos.leerEntero(scanner, "Cantidad de unidades: ");
+
+            if(leerSiNo(scanner, "¿Modificar precio?"))
+                precio = EntradaDatos.leerDouble(scanner, "Nuevo precio: ");
+
             if(leerSiNo(scanner, "¿Modificar nombre?"))
                 nombre = leerTexto(scanner, "Nuevo nombre: ");
 
-            double precio = leerDouble(scanner, "Nuevo precio: ");
-
-            productoService.modificar(producto, nombre, precio);
+            productoService.modificar(producto, nombre, unidades, precio);
             System.out.println("Producto modificado correctamente");
-
-        } catch (ProductoNoEncontradoException e) {
-            System.out.println("Error: " + e.getMessage());
 
         } catch (ProductoDuplicadoException e){
             System.out.println("Error al cambiar de nombre. " + e.getMessage());

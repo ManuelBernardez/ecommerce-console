@@ -8,14 +8,12 @@ public class Categoria implements Identificable {
     private String nombre;
     private String descripcion;
 
-    // Constructor.
     public Categoria(int codigo, String nombre, String descripcion){
         this.codigo = codigo;
         this.nombre = nombre;
         this.descripcion = descripcion;
     }
 
-    // Getters y setters
     @Override
     public int getCodigo() {
         return codigo;
@@ -39,7 +37,7 @@ public class Categoria implements Identificable {
 
     @Override
     public String toString() {
-        return "ID [" + codigo + "] - Nombre: " + nombre + " - Descripción: " + descripcion;
+        return "ID [" + codigo + "] - Nombre: " + nombre + " - Descripción: " + getDescripcion();
     }
 }
 

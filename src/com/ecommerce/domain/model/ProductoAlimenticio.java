@@ -4,8 +4,8 @@ public class ProductoAlimenticio extends Producto {
 
     private int diasParaVencimiento;
 
-    public ProductoAlimenticio(int codigo, String nombre, double precio, String categoria, int diasParaVencimiento){
-        super(codigo, nombre, precio, categoria);
+    public ProductoAlimenticio(int codigo, String nombre, double precio, Categoria categoria, int stock, int diasParaVencimiento){
+        super(codigo, nombre, precio, categoria, stock);
         this.diasParaVencimiento = diasParaVencimiento;
     }
 
@@ -23,12 +23,7 @@ public class ProductoAlimenticio extends Producto {
     }
 
     @Override
-    public String getTipoProducto(){
-        return "Alimenticio";
-    }
-
-    @Override
     public String getDetalleEspecifico(){
-        return "Días para vencimiento: " + this.diasParaVencimiento;
+        return "Días para vencimiento: " + getDiasParaVencimiento();
     }
 }

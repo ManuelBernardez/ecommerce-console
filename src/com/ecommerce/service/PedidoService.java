@@ -2,7 +2,6 @@ package com.ecommerce.service;
 
 import com.ecommerce.domain.model.*;
 import com.ecommerce.domain.repository.Repositorio;
-import com.ecommerce.domain.exception.*;
 
 import com.ecommerce.utils.Secuencias;
 
@@ -25,44 +24,87 @@ public class PedidoService {
     }
 
     public List<Pedido> listar() {
-        return repoPedidos.listado();
+        return repoPedidos.listar();
     }
 
     public Pedido buscarPorCodigo(int codigo) {
         Pedido p = repoPedidos.buscarPorCodigo(codigo);
 
         if (p == null)
-            throw new RuntimeException("Pedido no encontrado: " + codigo);
+            throw new RuntimeException("No existe un pedido de código " + codigo);
 
         return p;
     }
 
-    public void agregarProducto(int codigoPedido, int codigoProducto) {
+    public void agregarProducto(int codigoPedido, int codigoProducto, int cantidad) {
 
         Pedido pedido = buscarPorCodigo(codigoPedido);
         Producto producto = repoProductos.buscarPorCodigo(codigoProducto);
 
-        if (producto == null)
-            throw new ProductoNoEncontradoException(codigoProducto);
+        if (!producto.descontarStock(cantidad)) {
+            System.out.println("Stock insuficiente, quedan " + producto.getStock() + " unidades");
+            return;
+        }
 
-        if (pedido.getEstado() != EstadoPedido.CREADO)
-            throw new IllegalStateException("Sólo se pueden modificar pedidos si están en estado 'CREADO'");
-
-        pedido.agregarProducto(producto);
+        pedido.agregarProducto(producto, cantidad);
+        System.out.println("Producto agregado correctamente");
     }
 
-    public void cambiarEstado(int codigoPedido, EstadoPedido estado) {
+    public void quitarProducto(int codigoPedido, int codigoProducto, int cantidad) {
+
         Pedido pedido = buscarPorCodigo(codigoPedido);
+        Producto producto = repoProductos.buscarPorCodigo(codigoProducto);
+
+        int removidos = pedido.quitarProducto(producto, cantidad);
+
+        if (removidos == 0)
+            System.out.println("El producto no está en el pedido");
+        else{
+
+            producto.aumentarStock(removidos);
+            System.out.println("Se eliminaron " + removidos + " unidades del pedido");
+        }
+
+    }
+
+    public boolean cambiarEstado(int codigoPedido, EstadoPedido estado) {
+        Pedido pedido = buscarPorCodigo(codigoPedido);
+
+        if(pedido.getEstado() == EstadoPedido.ENVIADO && estado == EstadoPedido.CANCELADO){
+            System.out.println("No es posible cancelar un pedido enviado");
+            return false;
+        }
+
         pedido.setEstado(estado);
+        return true;
     }
 
-    public void eliminar(int codigo) {
+    public boolean eliminar(int codigo) {
         Pedido pedido = buscarPorCodigo(codigo);
+
+        if(pedido.getEstado() == EstadoPedido.ENVIADO){
+            System.out.println("No es posible eliminar un pedido enviado");
+            return false;
+        }
+
         repoPedidos.eliminar(pedido);
+        return true;
     }
 
-    public void listar_productos(){
-        for (Producto p : repoProductos.listado())
-            System.out.println(p);
+    public boolean mostrarProductos(){
+        if(repoProductos.estaVacio()){
+            System.out.println("No hay productos cargados");
+            return false;
+        }
+
+        System.out.println("ID | Nombre | Precio | Stock");
+
+        for (Producto p : repoProductos.listar())
+            System.out.println(p.getCodigo() + " | " + p.getNombre() + " | $" + p.getPrecio() + " | " + p.getStock() );
+
+        System.out.println("------------------------------");
+
+        return true;
     }
+
 }

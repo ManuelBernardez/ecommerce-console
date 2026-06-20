@@ -7,12 +7,12 @@ import java.util.List;
 public class Pedido implements Identificable {
 
     private int codigo;
-    private List<Producto> productos;
+    private List<ItemPedido> items;
     private EstadoPedido estado;
 
     public Pedido(int codigo) {
         this.codigo = codigo;
-        this.productos = new ArrayList<>();
+        this.items = new ArrayList<>();
         this.estado = EstadoPedido.CREADO;
     }
 
@@ -21,8 +21,8 @@ public class Pedido implements Identificable {
         return codigo;
     }
 
-    public List<Producto> getProductos() {
-        return new ArrayList<>(productos);
+    public List<ItemPedido> getItems() {
+        return new ArrayList<>(items);
     }
 
     public EstadoPedido getEstado() {
@@ -33,27 +33,69 @@ public class Pedido implements Identificable {
         this.estado = estado;
     }
 
-    public void agregarProducto(Producto producto) {
-        if (producto == null)
-            throw new IllegalArgumentException("Error al agregar: Producto inválido");
+    public void agregarProducto(Producto producto, int cantidad) {
 
-        productos.add(producto);
+        if (producto == null)
+            throw new IllegalArgumentException("Producto inválido");
+
+        if (estado != EstadoPedido.CREADO)
+            throw new IllegalStateException("Sólo se pueden modificar pedidos si están en estado 'CREADO'");
+
+        for (ItemPedido item : items) {
+            if (item.getProducto().equals(producto)) {
+                item.aumentarCantidad(cantidad);
+                return;
+            }
+        }
+
+        items.add(new ItemPedido(producto, cantidad));
+    }
+
+    public int quitarProducto(Producto producto, int cantidad) {
+
+        if (estado != EstadoPedido.CREADO)
+            throw new IllegalStateException("El pedido no se puede modificar");
+
+        for (ItemPedido item : items) {
+            if (item.getProducto().equals(producto)) {
+
+                int removidos = Math.min(cantidad, item.getCantidad());
+
+                item.disminuirCantidad(removidos);
+
+                if (item.getCantidad() == 0)
+                    items.remove(item);
+
+                return removidos;
+            }
+        }
+
+        return 0;
     }
 
     public double calcularTotal() {
         double total = 0;
 
-        for (Producto producto : productos)
-            total += producto.calcularPrecioFinal();
+        for (ItemPedido item : items)
+            total += item.subtotal();
 
         return total;
     }
 
     @Override
     public String toString() {
-        return "Pedido #" + codigo +
-                " | Productos: " + productos.size() +
+
+        String texto = "Pedido #" + codigo +
                 " | Estado: " + estado +
-                " | Total: $" + calcularTotal();
+                "\n-----------------------------\n";
+
+        for (ItemPedido item : items) {
+            texto += item.toString() + "\n";
+        }
+
+        texto += "-----------------------------\n";
+        texto += "TOTAL: $" + calcularTotal();
+
+        return texto;
     }
 }

@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) {
+    static void main() {
 
         Scanner scanner = new Scanner(System.in);
 
@@ -21,7 +21,7 @@ public class Main {
         Repositorio<Pedido> repoPedidos = new Repositorio<>();
 
         // Servicios (Lógica)
-        CategoriaService categoriaService = new CategoriaService(repoCategorias);
+        CategoriaService categoriaService = new CategoriaService(repoCategorias, repoProductos);
         ProductoService productoService = new ProductoService(repoProductos, repoCategorias);
         PedidoService pedidoService = new PedidoService(repoPedidos, repoProductos);
 

@@ -17,24 +17,24 @@ public class ProductoService {
         this.repoCategorias = repoCategorias;
     }
 
-    public void crearAlimenticio(String nombre, double precio, Categoria categoria, int vencimiento) {
+    public void crearAlimenticio(String nombre, double precio, Categoria categoria, int stock, int vencimiento) {
         validarCategoria(categoria);
         validarDuplicado(nombre);
 
-        Producto p = new ProductoAlimenticio(Secuencias.generarCodigoProducto(), nombre, precio, categoria.getNombre(), vencimiento);
+        Producto p = new ProductoAlimenticio(Secuencias.generarCodigoProducto(), nombre, precio, categoria, stock, vencimiento);
         repoProductos.agregar(p);
     }
 
-    public void crearElectronico(String nombre, double precio, Categoria categoria, double garantiaMeses) {
+    public void crearElectronico(String nombre, double precio, Categoria categoria, int stock, double garantiaMeses) {
         validarCategoria(categoria);
         validarDuplicado(nombre);
 
-        Producto p = new ProductoElectronico(Secuencias.generarCodigoProducto(), nombre, precio, categoria.getNombre(), garantiaMeses);
+        Producto p = new ProductoElectronico(Secuencias.generarCodigoProducto(), nombre, precio, categoria, stock, garantiaMeses);
         repoProductos.agregar(p);
     }
 
     public List<Producto> listar() {
-        return repoProductos.listado();
+        return repoProductos.listar();
     }
 
     public Producto buscarPorCodigo(int codigo) {
@@ -49,16 +49,17 @@ public class ProductoService {
 
     public Producto buscarPorNombre(String nombre) {
 
-        for (Producto p : repoProductos.listado()) {
+        for (Producto p : repoProductos.listar()) {
             if (p.getNombre().equalsIgnoreCase(nombre))
                 return p;
         }
 
-        throw new ProductoNoEncontradoException(nombre);
+        return null;
     }
 
-    public void modificar(Producto p, String nombre, double precio) {
+    public void modificar(Producto p, String nombre, int unidades, double precio) {
 
+        p.aumentarStock(unidades);
         p.setPrecio(precio);
 
         // Si se quiere cambiar el nombre, verifico que el nuevo nombre sea distinto al de los productos existentes
@@ -78,7 +79,7 @@ public class ProductoService {
     }
 
     public List<Categoria> listarCategorias() {
-        return repoCategorias.listado();
+        return repoCategorias.listar();
     }
 
     public Categoria buscarCategoriaPorCodigo(int codigo) {
